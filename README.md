@@ -1,2 +1,2 @@
 # OpenCV_study
-my opencv study sample
+my opencv study routine
