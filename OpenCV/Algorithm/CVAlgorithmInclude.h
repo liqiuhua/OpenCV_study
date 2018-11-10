@@ -15,10 +15,18 @@ public:
 	_CVAlgorithm();
 	~_CVAlgorithm();
 	uchar ShowImg(Mat imgSrc);
+	/************************************
+	*掩膜操作，两张图片权重合并
+	*************************************/
     void MaskOperation(Mat imgSrc,Mat imgOut);
     Mat MaskOperation(Mat imgSrc);
 	Mat MergedImages(Mat imgSrcA, Mat imgSrcB, double Weight);
 	void MergedImages(Mat imgSrcA, Mat imgSrcB, Mat imgOut, double Weight);
+	/************************************
+	*霍夫直线变化 Hough line transform 和 霍夫园变换 
+	*************************************/
+	void HoughLineTransform(Mat imgSrc, Mat imgOut);
+	void HoughCirclesTransform(Mat imgSrc, Mat imgOut);
 };
 
 #endif
