@@ -184,7 +184,6 @@ Double param2, // 中心点累加器阈值 – 候选圆心
 Int minradius, // 最小半径
 Int maxradius//最大半径 
 )
-
  */
 void _CVAlgorithm::HoughCirclesTransform(Mat imgSrc, Mat imgOut)
 {
@@ -201,7 +200,7 @@ void _CVAlgorithm::HoughCirclesTransform(Mat imgSrc, Mat imgOut)
 	vector<Vec3f> pcircles;
 
 
-	HoughCircles(imgGray, pcircles, HOUGH_GRADIENT,1,100,50.0,20,5,70 );
+	HoughCircles(imgGray, pcircles, HOUGH_GRADIENT,1,100,50.0,30,5,70 );
 	imgSrc.copyTo(imgOut);
 
 	Scalar color = Scalar(0, 255, 0);
@@ -210,8 +209,79 @@ void _CVAlgorithm::HoughCirclesTransform(Mat imgSrc, Mat imgOut)
 		Vec3f pcircle = pcircles[i];
 		circle(imgOut, Point(pcircle[0], pcircle[1]),pcircle[2], color, 2, LINE_AA);
 		circle(imgOut, Point(pcircle[0], pcircle[1]), 2, color, 2, LINE_AA);
-
-
 	}
 
+}
+
+/**********************************************
+* Map
+***********************************************/
+void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType)
+{
+	Mat Map_X, Map_Y;
+	Map_X.create(imgSrc.size(), CV_32FC1);
+	Map_Y.create(imgSrc.size(), CV_32FC1);
+	for (unsigned int row = 0; row < imgSrc.rows; row++)
+	{
+		for (unsigned int col = 0; col < imgSrc.cols; col++)
+		{
+			switch (MapType)
+			{
+			case MAPTYPE_RLMIRROR:
+			{
+				Map_X.at<float>(row, col) = col;
+				Map_Y.at<float>(row, col) = imgSrc.rows - row - 1;
+				break;
+			}
+			case MAPTYPE_UDMIRROR:
+			{
+				Map_X.at<float>(row, col) = imgSrc.cols - col - 1;
+				Map_Y.at<float>(row, col) = row;
+				break;
+			}
+
+			}
+		}
+	}
+	remap(imgSrc, imgOut, Map_X, Map_Y, INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 255, 0));
+}
+void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut, unsigned char MapType,double Scale)
+{
+	Mat Map_X, Map_Y;
+	Map_X.create(imgSrc.size(), CV_32FC1);
+	Map_Y.create(imgSrc.size(), CV_32FC1);
+	for (unsigned int row = 0; row < imgSrc.rows; row++)
+	{
+		for (unsigned int col = 0; col < imgSrc.cols; col++)
+		{
+			switch (MapType)
+			{
+			case MAPTYPE_ZOOMOUT:
+				if (col > (imgSrc.cols*0.25) && col <= (imgSrc.cols*0.75) && row > (imgSrc.rows*0.25) && row <= (imgSrc.rows*0.75))
+				{
+					Map_X.at<float>(row, col) = 2 * (col - (imgSrc.cols*0.25) );
+					Map_Y.at<float>(row, col) = 2 * (row - (imgSrc.rows*0.25));
+				}
+				else
+				{
+					Map_X.at<float>(row, col) = 0;
+					Map_Y.at<float>(row, col) = 0;
+				}
+				break;
+			case MAPTYPE_RLMIRROR:
+			{
+				Map_X.at<float>(row, col) = col;
+				Map_Y.at<float>(row, col) = imgSrc.rows - row - 1;
+				break; 
+			}
+			case MAPTYPE_UDMIRROR:
+			{
+				Map_X.at<float>(row, col) = imgSrc.cols - col - 1;
+				Map_Y.at<float>(row, col) = row;
+				break;
+			}
+			}
+		}
+	}
+	remap(imgSrc, imgOut, Map_X, Map_Y, INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 255, 0));
 }

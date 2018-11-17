@@ -8,6 +8,11 @@
 #include <iostream>
 using namespace cv;
 
+
+#define MAPTYPE_ZOOMOUT 1
+#define MAPTYPE_RLMIRROR 2
+#define MAPTYPE_UDMIRROR 3
+
 class _CVAlgorithm{
 private:
      
@@ -27,6 +32,11 @@ public:
 	*************************************/
 	void HoughLineTransform(Mat imgSrc, Mat imgOut);
 	void HoughCirclesTransform(Mat imgSrc, Mat imgOut);
+	/************************************
+	* œÒÀÿ÷ÿ”≥…‰
+	**************************************/
+	void ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType);
+	void ImgRemapping(Mat imgSrc, Mat imgOut, unsigned char MapType, double Scale);
 };
 
 #endif
