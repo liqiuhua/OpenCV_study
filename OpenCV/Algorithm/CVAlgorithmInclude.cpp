@@ -213,9 +213,15 @@ void _CVAlgorithm::HoughCirclesTransform(Mat imgSrc, Mat imgOut)
 
 }
 
-/**********************************************
-* Map
-***********************************************/
+/** @brief  pixel of image remapping
+@param imgSrc :input the A image
+@param MapType : type of Transform
+			type value:  MAPTYPE_ZOOMOUT  :Zoom out
+						 MAPTYPE_RLMIRROR :Right and Left the mirror
+						 MAPTYPE_UDMIRROR :Up and Down the mirror
+@param Scale : scale of Zomm out
+@param imgOut: output image after Transform
+ */
 void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType)
 {
 	Mat Map_X, Map_Y;
@@ -227,19 +233,20 @@ void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType)
 		{
 			switch (MapType)
 			{
-			case MAPTYPE_RLMIRROR:
+			case MAPTYPE_UDMIRROR:
 			{
 				Map_X.at<float>(row, col) = col;
 				Map_Y.at<float>(row, col) = imgSrc.rows - row - 1;
 				break;
 			}
-			case MAPTYPE_UDMIRROR:
+			case MAPTYPE_RLMIRROR:
 			{
 				Map_X.at<float>(row, col) = imgSrc.cols - col - 1;
 				Map_Y.at<float>(row, col) = row;
 				break;
 			}
-
+			default:
+				break;
 			}
 		}
 	}
@@ -248,40 +255,27 @@ void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType)
 void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut, unsigned char MapType,double Scale)
 {
 	Mat Map_X, Map_Y;
-	Map_X.create(imgSrc.size(), CV_32FC1);
-	Map_Y.create(imgSrc.size(), CV_32FC1);
-	for (unsigned int row = 0; row < imgSrc.rows; row++)
+	//imgOut.create(imgSrc.rows*Scale,imgSrc.cols*Scale , CV_32FC1);
+	Map_X.create(imgOut.size(), CV_32FC1);
+	Map_Y.create(imgOut.size(), CV_32FC1);
+	
+	for (unsigned int row = 0; row < imgOut.rows; row++)
 	{
-		for (unsigned int col = 0; col < imgSrc.cols; col++)
+		for (unsigned int col = 0; col < imgOut.cols; col++)
 		{
 			switch (MapType)
 			{
 			case MAPTYPE_ZOOMOUT:
-				if (col > (imgSrc.cols*0.25) && col <= (imgSrc.cols*0.75) && row > (imgSrc.rows*0.25) && row <= (imgSrc.rows*0.75))
-				{
-					Map_X.at<float>(row, col) = 2 * (col - (imgSrc.cols*0.25) );
-					Map_Y.at<float>(row, col) = 2 * (row - (imgSrc.rows*0.25));
-				}
-				else
-				{
-					Map_X.at<float>(row, col) = 0;
-					Map_Y.at<float>(row, col) = 0;
-				}
+				Map_X.at<float>(row, col) = 1.0 / Scale * col;
+				Map_Y.at<float>(row, col) = 1.0 / Scale * row;
+			//		cout << 1.0 / Scale * col << endl;
+
+			default:
 				break;
-			case MAPTYPE_RLMIRROR:
-			{
-				Map_X.at<float>(row, col) = col;
-				Map_Y.at<float>(row, col) = imgSrc.rows - row - 1;
-				break; 
-			}
-			case MAPTYPE_UDMIRROR:
-			{
-				Map_X.at<float>(row, col) = imgSrc.cols - col - 1;
-				Map_Y.at<float>(row, col) = row;
-				break;
-			}
+
 			}
 		}
 	}
 	remap(imgSrc, imgOut, Map_X, Map_Y, INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 255, 0));
+//	imshow("re", imgOut);
 }
