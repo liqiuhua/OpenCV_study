@@ -279,3 +279,41 @@ void _CVAlgorithm::ImgRemapping(Mat imgSrc, Mat imgOut, unsigned char MapType,do
 	remap(imgSrc, imgOut, Map_X, Map_Y, INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 255, 0));
 //	imshow("re", imgOut);
 }
+
+/********************************************************
+*匹配算法：1、计算平方不同 2、计算相关性  3、计算相关系数 
+			4、计算归一化平方不同 5、 计算归一化相关性 6计算归一化相关系数
+			cv::TM_SQDIFF：该方法使用平方差进行匹配，因此最佳的匹配结果在结果为0处，值越大匹配结果越差
+			cv::TM_SQDIFF_NORMED：该方法使用归一化的平方差进行匹配，最佳匹配也在结果为0处
+			cv::TM_CCORR：相关性匹配方法，该方法使用源图像与模板图像的卷积结果进行匹配，因此，最佳匹配位置在值最大处，值越小匹配结果越差。
+			cv::TM_CCORR_NORMED：归一化的相关性匹配方法，与相关性匹配方法类似，最佳匹配位置也是在值最大处。
+			cv::TM_CCOEFF：相关性系数匹配方法，该方法使用源图像与其均值的差、模板与其均值的差二者之间的相关性进行匹配，最佳匹配结果在值等于1处，最差匹配结果在值等于-1处，值等于0直接表示二者不相关。
+			cv::TM_CCOEFF_NORMED：归一化的相关性系数匹配方法，正值表示匹配的结果较好，负值则表示匹配的效果较差，也是值越大，匹配效果也好。
+*********************************************************/
+
+void _CVAlgorithm::ImgTemplateMatch(Mat imgSrc, Mat imgMatch, Mat imgOut,int MatchType)
+{
+	int width = imgSrc.cols - imgMatch.cols + 1;
+	int height = imgSrc.cols - imgMatch.cols + 1;
+	imgOut.create(width, height, CV_32FC1);
+
+	matchTemplate(imgSrc, imgMatch, imgOut, MatchType,Mat());
+	normalize(imgOut, imgOut, 0, 1, NORM_MINMAX, -1, Mat());
+	Point minLoc,maxLoc;
+	double min, max;
+	Mat dst;
+	imgSrc.copyTo(dst);
+	Point tmepLoc;
+	minMaxLoc(imgOut, &min, &max, &minLoc, &maxLoc, Mat());
+	if (MatchType == TM_SQDIFF || MatchType == TM_SQDIFF_NORMED) {
+		tmepLoc = minLoc;
+	}
+	else {
+		tmepLoc = maxLoc;
+	}
+	rectangle(dst, Rect(tmepLoc.x, tmepLoc.y, imgMatch.cols, imgMatch.rows), Scalar(0, 0, 255), 2, 8);
+	rectangle(imgOut, Rect(tmepLoc.x, tmepLoc.y, imgMatch.cols, imgMatch.rows), Scalar(0, 0, 255), 2, 8);
+//	imshow("Image TempLate matches inner", imgOut);
+	imshow("Image TempLate matches inner", dst);
+	dst.copyTo(imgOut);
+}

@@ -37,6 +37,7 @@ public:
 	**************************************/
 	void ImgRemapping(Mat imgSrc, Mat imgOut,unsigned char MapType);
 	void ImgRemapping(Mat imgSrc, Mat imgOut, unsigned char MapType, double Scale);
+	void ImgTemplateMatch(Mat imgSrc, Mat imgMatch, Mat imgOut, int MatchType);
 };
 
 #endif
